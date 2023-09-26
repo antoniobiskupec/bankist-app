@@ -18,7 +18,7 @@ const account2 = {
   interestRate: 1.5,
   pin: 2222,
 };
-cd;
+
 const account3 = {
   owner: "Steven Thomas Williams",
   movements: [200, -200, 340, -300, -20, 50, 400, -460],
@@ -110,11 +110,11 @@ const movementsDescritpion = movements.map(
 console.log(movementsDescritpion);
 
 // function that displays balance in balance label
-const calcDisplayBalance = (movements) => {
-  const balance = movements.reduce((acc, mov) => {
+const calcDisplayBalance = (acc) => {
+  acc.balance = acc.movements.reduce((acc, mov) => {
     return acc + mov;
   }, 0);
-  labelBalance.textContent = `${balance} €`;
+  labelBalance.textContent = `${acc.balance} €`;
 };
 
 const calcDisplaySummary = function (acc) {
@@ -135,7 +135,6 @@ const calcDisplaySummary = function (acc) {
     .filter((mov) => mov > 0)
     .map((deposit) => (deposit * acc.interestRate) / 100)
     .filter((int, i, arr) => {
-      console.log(arr);
       return int >= 1;
     })
     .reduce((acc, int) => acc + int, 0);
@@ -150,12 +149,19 @@ const createUsernames = function (accounts) {
       .split(" ")
       .map((firstLetterUsername) => firstLetterUsername[0])
       .join("");
-    console.log(acc.username);
   });
 };
 
 createUsernames(accounts);
-console.log(accounts);
+
+const updateUI = (acc) => {
+  // Display movements
+  displayMovements(acc.movements);
+  // Display balance
+  calcDisplayBalance(acc);
+  // Display summary
+  calcDisplaySummary(acc);
+};
 
 // EVENT handlers
 let currentAcc;
@@ -171,15 +177,28 @@ btnLogin.addEventListener("click", function (e) {
     // Display UI and welcome MSG
     labelWelcome.textContent = `Welcome back ${currentAcc.owner.split(" ")[0]}`;
     containerApp.style.opacity = 100;
-    // Display movements
-    displayMovements(currentAcc.movements);
-    // Display balance
-    calcDisplayBalance(currentAcc.movements);
-    // Display summary
-    calcDisplaySummary(currentAcc);
+
+    // Updating UI
+    updateUI(currentAcc);
 
     console.log("Logged in succesfully");
   }
+
+  // with findIndex() we can select index in an array and with splice() method we can remove it from an array. In this example we check if the value that we entered in input is the same as logged account. If it is the same we remove it with mentioned methods
+
+  btnClose.addEventListener("click", (e) => {
+    e.preventDefault();
+    if (
+      inputCloseUsername.value === currentAcc.username &&
+      Number(inputClosePin.value) === Number(currentAcc.pin)
+    ) {
+      const index = accounts.findIndex(
+        (acc) => acc.username === currentAcc.username
+      );
+      console.log(index);
+      accounts.splice(index, 1);
+    }
+  });
   // Reseting inputs to empty strings
   inputLoginUsername.value = "";
   inputLoginPin.value = "";
@@ -187,6 +206,30 @@ btnLogin.addEventListener("click", function (e) {
   inputLoginUsername.blur();
   inputLoginPin.blur();
 });
+
+btnTransfer.addEventListener("click", function (e) {
+  e.preventDefault();
+  const amount = Number(inputTransferAmount.value);
+  const receiverAcc = accounts.find(
+    (acc) => acc.username === inputTransferTo.value
+  );
+  inputTransferAmount.value = inputTransferTo.value = "";
+
+  if (
+    amount > 0 &&
+    receiverAcc &&
+    currentAcc.balance >= amount &&
+    receiverAcc?.username !== currentAcc.username
+  ) {
+    // Doing the transfer
+    currentAcc.movements.push(-amount);
+    receiverAcc.movements.push(amount);
+
+    // Updating UI
+    updateUI(currentAcc);
+  }
+});
+
 // PIPELINE
 const totalDepositsUSD = movements
   .filter((mov) => mov > 0)
