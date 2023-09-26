@@ -68,9 +68,12 @@ const inputLoanAmount = document.querySelector(".form__input--loan-amount");
 const inputCloseUsername = document.querySelector(".form__input--user");
 const inputClosePin = document.querySelector(".form__input--pin");
 
-const displayMovements = function (movements) {
+const displayMovements = function (movements, sort = false) {
   containerMovements.innerHTML = "";
-  movements.forEach(function (mov, i) {
+
+  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+
+  movs.forEach(function (mov, i) {
     const type = mov > 0 ? "deposit" : "withdrawal";
 
     const html = `
@@ -93,8 +96,6 @@ const movementsUsd = movements.map((mov) => {
   return mov * eurToUsd;
 });
 
-console.log(movementsUsd);
-
 const movementsUsdFor = [];
 for (const mov of movements) {
   movementsUsdFor.push(mov * eurToUsd);
@@ -106,8 +107,6 @@ const movementsDescritpion = movements.map(
       mov
     )} €`
 );
-
-console.log(movementsDescritpion);
 
 // function that displays balance in balance label
 const calcDisplayBalance = (acc) => {
@@ -184,10 +183,50 @@ btnLogin.addEventListener("click", function (e) {
     console.log("Logged in succesfully");
   }
 
+  btnTransfer.addEventListener("click", function (e) {
+    e.preventDefault();
+    const amount = Number(inputTransferAmount.value);
+    const receiverAcc = accounts.find(
+      (acc) => acc.username === inputTransferTo.value
+    );
+    inputTransferAmount.value = inputTransferTo.value = "";
+
+    if (
+      amount > 0 &&
+      receiverAcc &&
+      currentAcc.balance >= amount &&
+      receiverAcc?.username !== currentAcc.username
+    ) {
+      // Doing the transfer
+      currentAcc.movements.push(-amount);
+      receiverAcc.movements.push(amount);
+
+      // Updating UI
+      updateUI(currentAcc);
+    }
+  });
+
+  btnLoan.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    const amount = Number(inputLoanAmount.value);
+
+    if (amount > 0 && currentAcc.movements.some((mov) => mov > amount * 0.1)) {
+      // Add movement
+      currentAcc.movements.push(amount);
+
+      // Update UI
+      updateUI(currentAcc);
+    }
+
+    inputLoanAmount.value = "";
+  });
+
   // with findIndex() we can select index in an array and with splice() method we can remove it from an array. In this example we check if the value that we entered in input is the same as logged account. If it is the same we remove it with mentioned methods
 
   btnClose.addEventListener("click", (e) => {
     e.preventDefault();
+
     if (
       inputCloseUsername.value === currentAcc.username &&
       Number(inputClosePin.value) === Number(currentAcc.pin)
@@ -196,8 +235,13 @@ btnLogin.addEventListener("click", function (e) {
         (acc) => acc.username === currentAcc.username
       );
       console.log(index);
+      // Delete account
       accounts.splice(index, 1);
+
+      // Hide UI
+      containerApp.style.opacity = 0;
     }
+    inputCloseUsername.valiue = inputClosePin.value = "";
   });
   // Reseting inputs to empty strings
   inputLoginUsername.value = "";
@@ -207,38 +251,19 @@ btnLogin.addEventListener("click", function (e) {
   inputLoginPin.blur();
 });
 
-btnTransfer.addEventListener("click", function (e) {
-  e.preventDefault();
-  const amount = Number(inputTransferAmount.value);
-  const receiverAcc = accounts.find(
-    (acc) => acc.username === inputTransferTo.value
-  );
-  inputTransferAmount.value = inputTransferTo.value = "";
-
-  if (
-    amount > 0 &&
-    receiverAcc &&
-    currentAcc.balance >= amount &&
-    receiverAcc?.username !== currentAcc.username
-  ) {
-    // Doing the transfer
-    currentAcc.movements.push(-amount);
-    receiverAcc.movements.push(amount);
-
-    // Updating UI
-    updateUI(currentAcc);
-  }
-});
-
 // PIPELINE
 const totalDepositsUSD = movements
   .filter((mov) => mov > 0)
   // we call .map on result of movements.filter
   .map((mov, i, arr) => {
-    // console.log(arr);
     return mov * eurToUsd;
   })
-  // .map((mov) => mov * eurToUsd)
   .reduce((acc, mov) => acc + mov, 0);
 
-console.log(totalDepositsUSD);
+let sorted = false;
+btnSort.addEventListener("click", (e) => {
+  e.preventDefault();
+  displayMovements(currentAcc.movements, !sorted);
+  sorted = !sorted;
+});
+// LECTURES
