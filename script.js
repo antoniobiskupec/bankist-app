@@ -61,7 +61,7 @@ const account4 = {
   movements: [430, 1000, 700, 50, 90],
   interestRate: 1,
   pin: 4444,
-  movementsDates: 
+  movementsDates: [
     "2019-11-01T13:15:33.035Z",
     "2019-11-30T09:48:16.867Z",
     "2019-12-25T06:04:23.907Z",
