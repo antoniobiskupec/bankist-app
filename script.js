@@ -224,9 +224,29 @@ const updateUI = (acc) => {
 let currentAcc;
 
 // FAKE ALWAYS LOGGED IN
-// currentAcc = account1;
-// updateUI(currentAcc);
-// containerApp.style.opacity = 100;
+currentAcc = account1;
+updateUI(currentAcc);
+containerApp.style.opacity = 100;
+
+const now = new Date();
+
+const options = {
+  hour: "numeric",
+  minute: "numeric",
+  second: "numeric",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  weekday: "long",
+};
+
+function updateTimer() {
+  const now = new Date();
+  labelDate.textContent = new Intl.DateTimeFormat("en-GB", options).format(now);
+  requestAnimationFrame(updateTimer);
+}
+updateTimer();
+console.log(options);
 
 /////////////////////
 /////////////////////
