@@ -122,7 +122,7 @@ const formatMovementsDate = (date, locale) => {
     // const month = `${date.getMonth() + 1}`.padStart(2, 0);
     // const year = date.getFullYear();
     // return `${day}/${month}/${year}`;
-    return new Intl.DateTimeFormat(locale).format(date);
+    return new Intl.DateTimeFormat().format(date);
   }
 };
 
