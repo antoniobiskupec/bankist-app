@@ -20,6 +20,7 @@ const account1 = {
     "2023-07-28T12:36:17.929Z",
     "2023-10-24T10:51:36.790Z",
   ],
+  locale: "en-US",
 };
 
 const account2 = {
@@ -37,6 +38,7 @@ const account2 = {
     "2020-06-25T18:49:59.371Z",
     "2020-07-26T12:01:20.894Z",
   ],
+  locale: "en-HR",
 };
 
 const account3 = {
@@ -54,6 +56,7 @@ const account3 = {
     "2020-07-28T23:36:17.929Z",
     "2020-10-28T10:51:36.790Z",
   ],
+  locale: "en-US",
 };
 
 const account4 = {
@@ -71,6 +74,7 @@ const account4 = {
     "2020-06-25T18:49:59.371Z",
     "2020-07-26T12:01:20.894Z",
   ],
+  locale: "pt-PT",
 };
 
 const accounts = [account1, account2, account3, account4];
@@ -104,7 +108,7 @@ const inputClosePin = document.querySelector(".form__input--pin");
 /////////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS
 
-const formatMovementsDate = (date) => {
+const formatMovementsDate = (date, locale) => {
   const calcDaysPassed = (date1, date2) =>
     Math.round(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
 
@@ -114,10 +118,11 @@ const formatMovementsDate = (date) => {
   if (daysPassed === 1) return "Yesterday";
   if (daysPassed <= 7) return `${daysPassed} days ago`;
   else {
-    const day = `${date.getDate()}`.padStart(2, 0);
-    const month = `${date.getMonth() + 1}`.padStart(2, 0);
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    // const day = `${date.getDate()}`.padStart(2, 0);
+    // const month = `${date.getMonth() + 1}`.padStart(2, 0);
+    // const year = date.getFullYear();
+    // return `${day}/${month}/${year}`;
+    return new Intl.DateTimeFormat(locale).format(date);
   }
 };
 
@@ -132,7 +137,7 @@ const displayMovements = function (acc, sort = false) {
     const type = mov > 0 ? "deposit" : "withdrawal";
 
     const date = new Date(acc.movementsDates[i]);
-    const displayDate = formatMovementsDate(date);
+    const displayDate = formatMovementsDate(date, acc.locale);
 
     const html = `
   <div class="movements__row">
@@ -228,6 +233,7 @@ currentAcc = account1;
 updateUI(currentAcc);
 containerApp.style.opacity = 100;
 
+// timer that updates every second, need to replace requestAnimationFrame with setInterval
 const now = new Date();
 
 const options = {
@@ -235,14 +241,20 @@ const options = {
   minute: "numeric",
   second: "numeric",
   day: "numeric",
-  month: "long",
+  month: "numeric",
   year: "numeric",
-  weekday: "long",
+  // weekday: "long",
 };
+
+// const locale = navigator.language;
+// console.log(locale);
 
 function updateTimer() {
   const now = new Date();
-  labelDate.textContent = new Intl.DateTimeFormat("en-GB", options).format(now);
+  labelDate.textContent = new Intl.DateTimeFormat(
+    currentAcc.locale,
+    options
+  ).format(now);
   requestAnimationFrame(updateTimer);
 }
 updateTimer();
