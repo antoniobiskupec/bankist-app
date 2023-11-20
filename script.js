@@ -113,7 +113,7 @@ const formatMovementsDate = (date, locale) => {
     Math.round(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
 
   const daysPassed = calcDaysPassed(new Date(), date);
-  console.log(daysPassed);
+
   if (daysPassed === 0) return "Today";
   if (daysPassed === 1) return "Yesterday";
   if (daysPassed <= 7) return `${daysPassed} days ago`;
@@ -122,8 +122,16 @@ const formatMovementsDate = (date, locale) => {
     // const month = `${date.getMonth() + 1}`.padStart(2, 0);
     // const year = date.getFullYear();
     // return `${day}/${month}/${year}`;
+    // return new Intl.DateTimeFormat(locale).format(date);
     return new Intl.DateTimeFormat().format(date);
   }
+};
+
+const formatCur = (value, locale, currency) => {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: "EUR",
+  }).format(value);
 };
 
 const displayMovements = function (acc, sort = false) {
@@ -139,11 +147,13 @@ const displayMovements = function (acc, sort = false) {
     const date = new Date(acc.movementsDates[i]);
     const displayDate = formatMovementsDate(date, acc.locale);
 
+    const formattedMov = formatCur(mov, acc.locale, acc.currency);
+
     const html = `
   <div class="movements__row">
     <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
     <div class="movements__date">${displayDate}</div>
-    <div class="movements__value">${mov.toFixed(2)} €</div>
+    <div class="movements__value">${formattedMov}</div>
   </div>
     `;
 
@@ -176,7 +186,8 @@ const calcDisplayBalance = (acc) => {
   acc.balance = acc.movements.reduce((acc, mov) => {
     return acc + mov;
   }, 0);
-  labelBalance.textContent = `${acc.balance.toFixed(2)} €`;
+
+  labelBalance.textContent = formatCur(acc.balance, acc.locale, acc.currency);
 };
 
 const calcDisplaySummary = function (acc) {
@@ -184,14 +195,18 @@ const calcDisplaySummary = function (acc) {
   const incomes = acc.movements
     .filter((mov) => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
-  labelSumIn.textContent = `${incomes.toFixed(2)} €`;
+  labelSumIn.textContent = formatCur(incomes, acc.locale, acc.currency);
 
   // this function shows all outcomes of account
   const outcomes = acc.movements
     .filter((mov) => mov < 0)
     .reduce((acc, mov) => acc + mov, 0);
 
-  labelSumOut.textContent = `${Math.abs(outcomes).toFixed(2)} €`;
+  labelSumOut.textContent = formatCur(
+    Math.abs(outcomes),
+    acc.locale,
+    acc.currency
+  );
 
   const interest = acc.movements
     .filter((mov) => mov > 0)
@@ -200,7 +215,11 @@ const calcDisplaySummary = function (acc) {
       return int >= 1;
     })
     .reduce((acc, int) => acc + int, 0);
-  labelSumInterest.textContent = `${Math.abs(interest)} €`;
+  labelSumInterest.textContent = formatCur(
+    Math.abs(interest),
+    acc.locale,
+    acc.currency
+  );
 };
 
 const createUsernames = function (accounts) {
@@ -228,7 +247,7 @@ const updateUI = (acc) => {
 // EVENT handlers
 let currentAcc;
 
-// FAKE ALWAYS LOGGED IN
+// FAKE ALWAYS LOGGED IN±
 currentAcc = account1;
 updateUI(currentAcc);
 containerApp.style.opacity = 100;
@@ -258,7 +277,6 @@ function updateTimer() {
   requestAnimationFrame(updateTimer);
 }
 updateTimer();
-console.log(options);
 
 /////////////////////
 /////////////////////
