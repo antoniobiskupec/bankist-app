@@ -248,9 +248,9 @@ const updateUI = (acc) => {
 let currentAcc;
 
 // FAKE ALWAYS LOGGED IN±
-currentAcc = account1;
-updateUI(currentAcc);
-containerApp.style.opacity = 100;
+// currentAcc = account1;
+// updateUI(currentAcc);
+// containerApp.style.opacity = 100;
 
 // timer that updates every second, need to replace requestAnimationFrame with setInterval
 const now = new Date();
@@ -268,17 +268,41 @@ const options = {
 // const locale = navigator.language;
 // console.log(locale);
 
-function updateTimer() {
+setInterval(function updateTimer() {
   const now = new Date();
   labelDate.textContent = new Intl.DateTimeFormat(
     currentAcc.locale,
     options
   ).format(now);
-  requestAnimationFrame(updateTimer);
-}
-updateTimer();
+}, 1000);
 
+// Logout timer function
+const startLogOutTimer = () => {
+  // Set time to 5 minutes
+  let time = 10;
+
+  // Call the timer every second
+  const timerLogOut = setInterval(() => {
+    const min = String(Math.trunc(time / 60)).padStart(2, 0);
+    const sec = String(time % 60).padStart(2, 0);
+    // In each call, print the remaining time to the UI
+    labelTimer.textContent = `You will be logged out in: ${min}:${sec}`;
+
+    // Decrese 1s
+    time = time - 1;
+    // or we can use time--;
+    // When 0, stop timer and log out user
+    if (time === 0) {
+      clearInterval(timerLogOut);
+      labelWelcome.textContent = `Login to get started
+      
+    `;
+      containerApp.style.opacity = 0;
+    }
+  }, 1000);
+};
 /////////////////////
+//BUTTONS//
 /////////////////////
 
 btnLogin.addEventListener("click", function (e) {
@@ -302,7 +326,7 @@ btnLogin.addEventListener("click", function (e) {
     const minutes = `${now.getMinutes()}`.padStart(2, 0);
 
     labelDate.textContent = `${day}/${month}/${year}, ${hour}:${minutes}`;
-
+    startLogOutTimer();
     // Updating UI
     updateUI(currentAcc);
 
@@ -341,15 +365,18 @@ btnLogin.addEventListener("click", function (e) {
 
     const amount = Math.floor(inputLoanAmount.value);
 
+    // added setTimeout, after 5 seconds the loan amount is visible on our account
     if (amount > 0 && currentAcc.movements.some((mov) => mov > amount * 0.1)) {
-      // Add movement
-      currentAcc.movements.push(amount);
+      setTimeout(function () {
+        // Add movement
+        currentAcc.movements.push(amount);
 
-      // Add loan date
-      currentAcc.movementsDates.push(new Date().toISOString());
+        // Add loan date
+        currentAcc.movementsDates.push(new Date().toISOString());
 
-      // Update UI
-      updateUI(currentAcc);
+        // Update UI
+        updateUI(currentAcc);
+      }, 5000);
     }
 
     inputLoanAmount.value = "";
