@@ -289,8 +289,7 @@ const startLogOutTimer = () => {
     labelTimer.textContent = `You will be logged out in: ${min}:${sec}`;
 
     // Decrese 1s
-    time = time - 1;
-    // or we can use time--;
+
     // When 0, stop timer and log out user
     if (time === 0) {
       clearInterval(timerLogOut);
@@ -299,6 +298,8 @@ const startLogOutTimer = () => {
     `;
       containerApp.style.opacity = 0;
     }
+    time = time - 1;
+    // or we can use time--;
   }, 1000);
 };
 /////////////////////
