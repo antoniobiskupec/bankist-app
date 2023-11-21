@@ -244,15 +244,17 @@ const updateUI = (acc) => {
   calcDisplaySummary(acc);
 };
 
+////////////////////////////
 // EVENT handlers
-let currentAcc;
+////////////////////////////
+
+let currentAcc, timer;
 
 // FAKE ALWAYS LOGGED IN±
 // currentAcc = account1;
 // updateUI(currentAcc);
 // containerApp.style.opacity = 100;
 
-// timer that updates every second, need to replace requestAnimationFrame with setInterval
 const now = new Date();
 
 const options = {
@@ -265,42 +267,38 @@ const options = {
   // weekday: "long",
 };
 
-// const locale = navigator.language;
-// console.log(locale);
+const locale = navigator.language;
+console.log(locale);
 
 setInterval(function updateTimer() {
   const now = new Date();
-  labelDate.textContent = new Intl.DateTimeFormat(
-    currentAcc.locale,
-    options
-  ).format(now);
+  labelDate.textContent = new Intl.DateTimeFormat(options).format(now);
 }, 1000);
 
 // Logout timer function
-const startLogOutTimer = () => {
-  // Set time to 5 minutes
-  let time = 10;
-
-  // Call the timer every second
-  const timerLogOut = setInterval(() => {
+const startLogoutTimer = () => {
+  const tick = function () {
     const min = String(Math.trunc(time / 60)).padStart(2, 0);
     const sec = String(time % 60).padStart(2, 0);
-    // In each call, print the remaining time to the UI
-    labelTimer.textContent = `You will be logged out in: ${min}:${sec}`;
+    // In each call, print the remaining time to UI
+    labelTimer.textContent = `${min}:${sec}`;
 
-    // Decrese 1s
-
-    // When 0, stop timer and log out user
+    // When the time is at 0 logout the user
     if (time === 0) {
-      clearInterval(timerLogOut);
-      labelWelcome.textContent = `Login to get started
-      
-    `;
+      clearInterval(timer);
+      labelWelcome.textContent = `Login to get started`;
       containerApp.style.opacity = 0;
     }
-    time = time - 1;
-    // or we can use time--;
-  }, 1000);
+    // Decrase timer by 1 second
+    time--;
+  };
+  // Set time to 5 minutes
+  let time = 30;
+
+  // Call the timer every second
+  tick();
+  const timer = setInterval(tick, 1000);
+  return timer;
 };
 /////////////////////
 //BUTTONS//
@@ -325,13 +323,16 @@ btnLogin.addEventListener("click", function (e) {
     const year = now.getFullYear();
     const hour = `${now.getHours()}`.padStart(2, 0);
     const minutes = `${now.getMinutes()}`.padStart(2, 0);
-
+    ``;
     labelDate.textContent = `${day}/${month}/${year}, ${hour}:${minutes}`;
-    startLogOutTimer();
+
     // Updating UI
     updateUI(currentAcc);
 
-    console.log("Logged in succesfully");
+    // Timer
+    if (timer) clearInterval(timer);
+
+    timer = startLogoutTimer();
   }
 
   btnTransfer.addEventListener("click", function (e) {
