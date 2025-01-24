@@ -255,20 +255,17 @@ let currentAcc, timer;
 // updateUI(currentAcc);
 // containerApp.style.opacity = 100;
 
-const now = new Date();
-
 const options = {
   hour: "numeric",
   minute: "numeric",
-  second: "numeric",
   day: "numeric",
   month: "numeric",
   year: "numeric",
   // weekday: "long",
 };
 
-const locale = navigator.language;
-console.log(locale);
+// const locale = navigator.language;
+// console.log(locale);
 
 setInterval(function updateTimer() {
   const now = new Date();
@@ -293,7 +290,7 @@ const startLogoutTimer = () => {
     time--;
   };
   // Set time to 5 minutes
-  let time = 120;
+  let time = 70;
 
   // Call the timer every second
   tick();
